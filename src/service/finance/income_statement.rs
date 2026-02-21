@@ -1,16 +1,16 @@
 use finance_query::{Ticker, StatementType, Frequency};
 use super::Period;
 
-pub struct CashFlowData {
+pub struct IncomeStatementData {
     pub dates: Vec<String>,
     pub values: Vec<f64>,
 }
 
-pub async fn get_cash_flow(
+pub async fn get_income_statement(
     symbol: &str,
     field: &str,
     period: Period,
-) -> Result<CashFlowData, Box<dyn std::error::Error + Send + Sync>> {
+) -> Result<IncomeStatementData, Box<dyn std::error::Error + Send + Sync>> {
     use tokio::time::{timeout, Duration};
     
     // Add timeout to prevent Discord interaction timeout
@@ -22,10 +22,10 @@ pub async fn get_cash_flow(
             Period::Quarterly => Frequency::Quarterly,
         };
 
-        let cashflow = ticker.financials(StatementType::CashFlow, frequency).await?;
+        let income_statement = ticker.financials(StatementType::Income, frequency).await?;
 
-        let field_data = cashflow.statement.get(field)
-            .ok_or_else(|| format!("Field '{}' not found in cash flow statement", field))?;
+        let field_data = income_statement.statement.get(field)
+            .ok_or_else(|| format!("Field '{}' not found in income statement", field))?;
 
         let mut dates: Vec<String> = field_data.keys().cloned().collect();
         dates.sort_by(|a, b| b.cmp(a)); // Sort descending (newest first)
@@ -34,7 +34,7 @@ pub async fn get_cash_flow(
             .filter_map(|date| field_data.get(date).copied())
             .collect();
 
-        Ok(CashFlowData { dates, values })
+        Ok(IncomeStatementData { dates, values })
     }).await;
 
     match result {
