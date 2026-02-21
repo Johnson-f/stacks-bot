@@ -7,14 +7,24 @@ pub async fn price(
     ctx: Context<'_>,
     #[description = "Stock ticker symbol (e.g., AAPL)"] symbol: String,
 ) -> Result<(), Error> {
-    ctx.defer().await?;
+    // Defer immediately to prevent timeout
+    if let Err(e) = ctx.defer().await {
+        tracing::error!("Failed to defer: {}", e);
+        return Err(e.into());
+    }
 
-    match finance::get_stock_price(&symbol.to_uppercase()).await {
+    let symbol_upper = symbol.to_uppercase();
+    tracing::info!("Fetching price for {}", symbol_upper);
+
+    match finance::get_stock_price(&symbol_upper).await {
         Ok(price) => {
-            ctx.say(format!("**{}**: ${:.2}", symbol.to_uppercase(), price)).await?;
+            tracing::info!("Successfully fetched price for {}: ${:.2}", symbol_upper, price);
+            ctx.say(format!("**{}**: ${:.2}", symbol_upper, price)).await?;
         }
         Err(e) => {
-            ctx.say(format!("Could not fetch price for {}: {}", symbol, e)).await?;
+            let error_msg = format!("Could not fetch price for {}: {}", symbol_upper, e);
+            tracing::error!("{}", error_msg);
+            ctx.say(error_msg).await?;
         }
     }
 

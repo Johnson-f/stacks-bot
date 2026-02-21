@@ -5,7 +5,7 @@ use tracing::{info, error};
 mod service;
 mod commands;
 
-use commands::price;
+use commands::{price, cashflow};
 
 type Error = Box<dyn std::error::Error + Send + Sync>;
 type Context<'a> = poise::Context<'a, Data, Error>;
@@ -28,7 +28,7 @@ async fn main() {
 
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
-            commands: vec![price()],
+            commands: vec![price(), cashflow()],
             ..Default::default()
         })
         .setup(|ctx, _ready, framework| {

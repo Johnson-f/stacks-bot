@@ -1,0 +1,9 @@
+[package]
+name = "testing"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+chrono = "0.4.43"
+finance-query = "2.2.0"
+tokio = { version = "1.49.0", features = ["full"] }
