@@ -1,11 +1,11 @@
-use poise::serenity_prelude as serenity;
 use dotenvy::dotenv;
-use tracing::{info, error};
+use poise::serenity_prelude as serenity;
+use tracing::{error, info};
 
-mod service;
 mod commands;
+mod service;
 
-use commands::{price, cashflow, balancesheet, incomestatement};
+use commands::{balancesheet, cashflow, incomestatement, price};
 
 type Error = Box<dyn std::error::Error + Send + Sync>;
 type Context<'a> = poise::Context<'a, Data, Error>;
@@ -16,14 +16,13 @@ pub struct Data {}
 #[tokio::main]
 async fn main() {
     tracing_subscriber::fmt::init();
-    
+
     dotenv().ok();
-    
+
     info!("Starting Discord bot...");
-    
-    let token = std::env::var("DISCORD_TOKEN")
-        .expect("Missing DISCORD_TOKEN environment variable");
-    
+
+    let token = std::env::var("DISCORD_TOKEN").expect("Missing DISCORD_TOKEN environment variable");
+
     let intents = serenity::GatewayIntents::non_privileged();
 
     let framework = poise::Framework::builder()
@@ -34,7 +33,7 @@ async fn main() {
         .setup(|ctx, _ready, framework| {
             Box::pin(async move {
                 info!("Registering slash commands...");
-                
+
                 // For development: register to specific guilds for instant updates
                 let guild_ids = std::env::var("GUILD_IDS")
                     .ok()
@@ -45,17 +44,25 @@ async fn main() {
                             .collect::<Vec<_>>()
                     })
                     .unwrap_or_default();
-                
+
                 if !guild_ids.is_empty() {
-                    info!("Registering commands to {} guild(s) (instant)", guild_ids.len());
+                    info!(
+                        "Registering commands to {} guild(s) (instant)",
+                        guild_ids.len()
+                    );
                     for guild_id in guild_ids {
-                        poise::builtins::register_in_guild(ctx, &framework.options().commands, guild_id).await?;
+                        poise::builtins::register_in_guild(
+                            ctx,
+                            &framework.options().commands,
+                            guild_id,
+                        )
+                        .await?;
                     }
                 } else {
                     info!("Registering commands globally (takes up to 1 hour)");
                     poise::builtins::register_globally(ctx, &framework.options().commands).await?;
                 }
-                
+
                 info!("Bot is ready!");
                 Ok(Data {})
             })

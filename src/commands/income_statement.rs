@@ -1,5 +1,5 @@
-use crate::{Context, Error};
 use crate::service::finance::{self, Period};
+use crate::{Context, Error};
 
 /// Get income statement data for a stock
 #[poise::command(slash_command)]
@@ -27,7 +27,11 @@ pub async fn incomestatement(
     let field_str = field.as_str();
     let symbol_upper = symbol.to_uppercase();
 
-    tracing::info!("Fetching income statement for {} - field: {}", symbol_upper, field_str);
+    tracing::info!(
+        "Fetching income statement for {} - field: {}",
+        symbol_upper,
+        field_str
+    );
 
     match finance::get_income_statement(&symbol_upper, field_str, period_type).await {
         Ok(data) => {
@@ -44,7 +48,10 @@ pub async fn incomestatement(
                 PeriodChoice::Quarterly => "Quarterly",
             };
 
-            let mut response = format!("**{} - {} ({})**\n\n", symbol_upper, field_name, period_label);
+            let mut response = format!(
+                "**{} - {} ({})**\n\n",
+                symbol_upper, field_name, period_label
+            );
 
             for (date, value) in data.dates.iter().zip(data.values.iter()).take(5) {
                 let formatted = if value.abs() >= 1_000_000_000.0 {
@@ -61,7 +68,10 @@ pub async fn incomestatement(
             ctx.say(response).await?;
         }
         Err(e) => {
-            let error_msg = format!("Could not fetch income statement for {}: {}", symbol_upper, e);
+            let error_msg = format!(
+                "Could not fetch income statement for {}: {}",
+                symbol_upper, e
+            );
             tracing::error!("{}", error_msg);
             ctx.say(error_msg).await?;
         }
@@ -89,7 +99,7 @@ pub enum IncomeStatementField {
     CostOfRevenue,
     #[name = "Gross Profit"]
     GrossProfit,
-    
+
     // Operating Metrics
     #[name = "Operating Expense"]
     OperatingExpense,
@@ -99,7 +109,7 @@ pub enum IncomeStatementField {
     ResearchAndDevelopment,
     #[name = "Operating Income"]
     OperatingIncome,
-    
+
     // Interest & Other
     #[name = "Interest Expense"]
     InterestExpense,
@@ -109,7 +119,7 @@ pub enum IncomeStatementField {
     NetInterestIncome,
     #[name = "Other Income Expense"]
     OtherIncomeExpense,
-    
+
     // Income & Tax
     #[name = "Pretax Income"]
     PretaxIncome,
@@ -119,7 +129,7 @@ pub enum IncomeStatementField {
     NetIncome,
     #[name = "Net Income Common Stockholders"]
     NetIncomeCommonStockholders,
-    
+
     // Per Share Metrics
     #[name = "Diluted EPS"]
     DilutedEPS,
@@ -129,14 +139,14 @@ pub enum IncomeStatementField {
     DilutedAverageShares,
     #[name = "Basic Average Shares"]
     BasicAverageShares,
-    
+
     // Advanced Metrics
     #[name = "EBIT"]
-    EBIT,
+    Ebit,
     #[name = "EBITDA"]
-    EBITDA,
+    Ebitda,
     #[name = "Normalized EBITDA"]
-    NormalizedEBITDA,
+    NormalizedEbitda,
     #[name = "Total Expenses"]
     TotalExpenses,
 }
@@ -149,35 +159,35 @@ impl IncomeStatementField {
             Self::OperatingRevenue => "OperatingRevenue",
             Self::CostOfRevenue => "CostOfRevenue",
             Self::GrossProfit => "GrossProfit",
-            
+
             // Operating Metrics
             Self::OperatingExpense => "OperatingExpense",
             Self::SellingGeneralAndAdministration => "SellingGeneralAndAdministration",
             Self::ResearchAndDevelopment => "ResearchAndDevelopment",
             Self::OperatingIncome => "OperatingIncome",
-            
+
             // Interest & Other
             Self::InterestExpense => "InterestExpense",
             Self::InterestIncome => "InterestIncome",
             Self::NetInterestIncome => "NetInterestIncome",
             Self::OtherIncomeExpense => "OtherIncomeExpense",
-            
+
             // Income & Tax
             Self::PretaxIncome => "PretaxIncome",
             Self::TaxProvision => "TaxProvision",
             Self::NetIncome => "NetIncome",
             Self::NetIncomeCommonStockholders => "NetIncomeCommonStockholders",
-            
+
             // Per Share Metrics
             Self::DilutedEPS => "DilutedEPS",
             Self::BasicEPS => "BasicEPS",
             Self::DilutedAverageShares => "DilutedAverageShares",
             Self::BasicAverageShares => "BasicAverageShares",
-            
+
             // Advanced Metrics
-            Self::EBIT => "EBIT",
-            Self::EBITDA => "EBITDA",
-            Self::NormalizedEBITDA => "NormalizedEBITDA",
+            Self::Ebit => "EBIT",
+            Self::Ebitda => "EBITDA",
+            Self::NormalizedEbitda => "NormalizedEBITDA",
             Self::TotalExpenses => "TotalExpenses",
         }
     }

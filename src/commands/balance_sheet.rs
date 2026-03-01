@@ -1,5 +1,5 @@
-use crate::{Context, Error};
 use crate::service::finance::{self, Period};
+use crate::{Context, Error};
 
 /// Get balance sheet data for a stock
 #[poise::command(slash_command)]
@@ -27,7 +27,11 @@ pub async fn balancesheet(
     let field_str = field.as_str();
     let symbol_upper = symbol.to_uppercase();
 
-    tracing::info!("Fetching balance sheet for {} - field: {}", symbol_upper, field_str);
+    tracing::info!(
+        "Fetching balance sheet for {} - field: {}",
+        symbol_upper,
+        field_str
+    );
 
     match finance::get_balance_sheet(&symbol_upper, field_str, period_type).await {
         Ok(data) => {
@@ -44,7 +48,10 @@ pub async fn balancesheet(
                 PeriodChoice::Quarterly => "Quarterly",
             };
 
-            let mut response = format!("**{} - {} ({})**\n\n", symbol_upper, field_name, period_label);
+            let mut response = format!(
+                "**{} - {} ({})**\n\n",
+                symbol_upper, field_name, period_label
+            );
 
             for (date, value) in data.dates.iter().zip(data.values.iter()).take(5) {
                 let formatted = if value.abs() >= 1_000_000_000.0 {
@@ -95,7 +102,7 @@ pub enum BalanceSheetField {
     NetPPE,
     #[name = "Goodwill"]
     Goodwill,
-    
+
     // Liabilities
     #[name = "Total Liabilities"]
     TotalLiabilitiesNetMinorityInterest,
@@ -109,7 +116,7 @@ pub enum BalanceSheetField {
     LongTermDebt,
     #[name = "Total Debt"]
     TotalDebt,
-    
+
     // Equity
     #[name = "Stockholders Equity"]
     StockholdersEquity,
@@ -119,7 +126,7 @@ pub enum BalanceSheetField {
     RetainedEarnings,
     #[name = "Treasury Stock"]
     TreasuryStock,
-    
+
     // Other Metrics
     #[name = "Working Capital"]
     WorkingCapital,
@@ -142,7 +149,7 @@ impl BalanceSheetField {
             Self::Inventory => "Inventory",
             Self::NetPPE => "NetPPE",
             Self::Goodwill => "Goodwill",
-            
+
             // Liabilities
             Self::TotalLiabilitiesNetMinorityInterest => "TotalLiabilitiesNetMinorityInterest",
             Self::CurrentLiabilities => "CurrentLiabilities",
@@ -150,13 +157,13 @@ impl BalanceSheetField {
             Self::CurrentDebt => "CurrentDebt",
             Self::LongTermDebt => "LongTermDebt",
             Self::TotalDebt => "TotalDebt",
-            
+
             // Equity
             Self::StockholdersEquity => "StockholdersEquity",
             Self::CommonStockEquity => "CommonStockEquity",
             Self::RetainedEarnings => "RetainedEarnings",
             Self::TreasuryStock => "TreasuryStock",
-            
+
             // Other Metrics
             Self::WorkingCapital => "WorkingCapital",
             Self::TangibleBookValue => "TangibleBookValue",

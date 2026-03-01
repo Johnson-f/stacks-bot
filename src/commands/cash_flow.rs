@@ -1,5 +1,5 @@
-use crate::{Context, Error};
 use crate::service::finance::{self, Period};
+use crate::{Context, Error};
 
 /// Get cash flow statement data for a stock
 #[poise::command(slash_command)]
@@ -27,7 +27,11 @@ pub async fn cashflow(
     let field_str = field.as_str();
     let symbol_upper = symbol.to_uppercase();
 
-    tracing::info!("Fetching cash flow for {} - field: {}", symbol_upper, field_str);
+    tracing::info!(
+        "Fetching cash flow for {} - field: {}",
+        symbol_upper,
+        field_str
+    );
 
     match finance::get_cash_flow(&symbol_upper, field_str, period_type).await {
         Ok(data) => {
@@ -44,7 +48,10 @@ pub async fn cashflow(
                 PeriodChoice::Quarterly => "Quarterly",
             };
 
-            let mut response = format!("**{} - {} Cash Flow ({})**\n\n", symbol_upper, field_name, period_label);
+            let mut response = format!(
+                "**{} - {} Cash Flow ({})**\n\n",
+                symbol_upper, field_name, period_label
+            );
 
             for (date, value) in data.dates.iter().zip(data.values.iter()).take(5) {
                 let formatted = if value.abs() >= 1_000_000_000.0 {

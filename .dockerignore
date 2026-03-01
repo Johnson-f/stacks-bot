@@ -1,0 +1,8 @@
+target/
+.git/
+.github/
+*.md
+.env
+.env.example
+.gitignore
+finance-query/

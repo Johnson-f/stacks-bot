@@ -1,5 +1,5 @@
-use finance_query::{Ticker, StatementType, Frequency};
 use super::Period;
+use finance_query::{Frequency, StatementType, Ticker};
 
 pub struct BalanceSheetData {
     pub dates: Vec<String>,
@@ -11,12 +11,12 @@ pub async fn get_balance_sheet(
     field: &str,
     period: Period,
 ) -> Result<BalanceSheetData, Box<dyn std::error::Error + Send + Sync>> {
-    use tokio::time::{timeout, Duration};
-    
+    use tokio::time::{Duration, timeout};
+
     // Add timeout to prevent Discord interaction timeout
     let result = timeout(Duration::from_secs(25), async {
         let ticker = Ticker::new(symbol).await?;
-        
+
         let frequency = match period {
             Period::Yearly => Frequency::Annual,
             Period::Quarterly => Frequency::Quarterly,
@@ -24,18 +24,22 @@ pub async fn get_balance_sheet(
 
         let balance_sheet = ticker.financials(StatementType::Balance, frequency).await?;
 
-        let field_data = balance_sheet.statement.get(field)
+        let field_data = balance_sheet
+            .statement
+            .get(field)
             .ok_or_else(|| format!("Field '{}' not found in balance sheet", field))?;
 
         let mut dates: Vec<String> = field_data.keys().cloned().collect();
         dates.sort_by(|a, b| b.cmp(a)); // Sort descending (newest first)
 
-        let values: Vec<f64> = dates.iter()
+        let values: Vec<f64> = dates
+            .iter()
             .filter_map(|date| field_data.get(date).copied())
             .collect();
 
         Ok(BalanceSheetData { dates, values })
-    }).await;
+    })
+    .await;
 
     match result {
         Ok(data) => data,

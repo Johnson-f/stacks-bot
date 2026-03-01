@@ -1,5 +1,5 @@
-use crate::{Context, Error};
 use crate::service::finance;
+use crate::{Context, Error};
 
 /// Get the current price of a stock
 #[poise::command(slash_command)]
@@ -18,8 +18,13 @@ pub async fn price(
 
     match finance::get_stock_price(&symbol_upper).await {
         Ok(price) => {
-            tracing::info!("Successfully fetched price for {}: ${:.2}", symbol_upper, price);
-            ctx.say(format!("**{}**: ${:.2}", symbol_upper, price)).await?;
+            tracing::info!(
+                "Successfully fetched price for {}: ${:.2}",
+                symbol_upper,
+                price
+            );
+            ctx.say(format!("**{}**: ${:.2}", symbol_upper, price))
+                .await?;
         }
         Err(e) => {
             let error_msg = format!("Could not fetch price for {}: {}", symbol_upper, e);

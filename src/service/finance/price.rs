@@ -1,8 +1,10 @@
 use finance_query::Ticker;
 
-pub async fn get_stock_price(symbol: &str) -> Result<f64, Box<dyn std::error::Error + Send + Sync>> {
-    use tokio::time::{timeout, Duration};
-    
+pub async fn get_stock_price(
+    symbol: &str,
+) -> Result<f64, Box<dyn std::error::Error + Send + Sync>> {
+    use tokio::time::{Duration, timeout};
+
     // Add timeout to prevent Discord interaction timeout
     let result = timeout(Duration::from_secs(25), async {
         let ticker = Ticker::builder(symbol).build().await?;
@@ -15,7 +17,8 @@ pub async fn get_stock_price(symbol: &str) -> Result<f64, Box<dyn std::error::Er
             .ok_or("Price not available")?;
 
         Ok(price)
-    }).await;
+    })
+    .await;
 
     match result {
         Ok(data) => data,
