@@ -37,7 +37,8 @@ async fn main() {
                 // Check if we're in development mode
                 let is_dev = std::env::var("ENVIRONMENT")
                     .unwrap_or_else(|_| "production".to_string())
-                    .to_lowercase() == "development";
+                    .to_lowercase()
+                    == "development";
 
                 if is_dev {
                     // Development: register to specific guilds for instant updates
@@ -66,7 +67,8 @@ async fn main() {
                         }
                     } else {
                         info!("Development mode: No GUILD_IDS specified, registering globally");
-                        poise::builtins::register_globally(ctx, &framework.options().commands).await?;
+                        poise::builtins::register_globally(ctx, &framework.options().commands)
+                            .await?;
                     }
                 } else {
                     // Production: always register globally
